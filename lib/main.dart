@@ -195,13 +195,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         continue;
       }
 
-      // guardar número pendiente
-      if (currentNumber.isNotEmpty) {
-        tokens.add(currentNumber);
-        currentNumber = '';
-      }
-
-      // detectar negativo
       if (char == '-') {
         bool isUnary =
             i == 0 ||
@@ -209,19 +202,24 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             _isOperator(expression[i - 1]);
 
         if (isUnary) {
-          tokens.add('0');
+          currentNumber += '-';  
+          continue;
         }
+      }
+
+      if (currentNumber.isNotEmpty) {
+        tokens.add(currentNumber);
+        currentNumber = '';
       }
 
       if (tokens.isNotEmpty) {
         String last = tokens.last;
 
         if (char == '(' &&
-            (RegExp(r'^[0-9.]+$').hasMatch(last) || last == ')')) {
+            (RegExp(r'^[0-9.\-]+$').hasMatch(last) || last == ')')) {
           tokens.add('*');
         }
       }
-
       tokens.add(char);
     }
 
@@ -239,7 +237,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     List<String> operators = [];
 
     for (String token in tokens) {
-      if (RegExp(r'^[0-9.]+$').hasMatch(token)) {
+      if (RegExp(r'^-?[0-9.]+$').hasMatch(token)) {
         output.add(token);
       } else if (token == '(') {
         operators.add(token);
@@ -264,7 +262,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   double _evaluateRPN(List<String> rpn) {
     List<double> stack = [];
     for (String token in rpn) {
-      if (RegExp(r'^[0-9.]+$').hasMatch(token)) {
+      if (RegExp(r'^-?[0-9.]+$').hasMatch(token)) {
         stack.add(double.parse(token));
       } else {
         if (stack.length < 2) throw Exception('Invalid expression');
